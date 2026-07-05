@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Materials | Job Copilot{% endblock %}
+
+{% block content %}
+  <section class="space-y-6">
+    <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-panel">
+      <p class="text-sm font-medium uppercase tracking-[0.2em] text-pine">Phase 5</p>
+      <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">Application materials for {{ application.job.title }}</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
+        These drafts are intentionally conservative. They rely on your stored profile facts and the parsed job description, and they still require your review before any manual submission.
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href="{{ url_for('jobs.detail', job_id=application.job.id) }}" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Back to job</a>
+        <a href="{{ url_for('tracker.index') }}" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">Open tracker</a>
+      </div>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <div class="space-y-6">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Tailored resume draft</h2>
+          <pre class="mt-5 whitespace-pre-wrap rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">{{ application.resume_draft }}</pre>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Cover letter draft</h2>
+          <pre class="mt-5 whitespace-pre-wrap rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">{{ application.cover_letter_draft }}</pre>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Application answers</h2>
+          <div class="mt-5 space-y-4">
+            {% for item in application.screening_answers %}
+              <div class="rounded-2xl bg-slate-50 p-4">
+                <p class="font-medium text-slate-900">{{ item.question }}</p>
+                <p class="mt-2 text-sm leading-6 text-slate-700">{{ item.answer }}</p>
+              </div>
+            {% else %}
+              <p class="text-sm text-slate-500">No answer drafts generated yet.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Truthfulness notes</h2>
+          <pre class="mt-5 whitespace-pre-wrap rounded-2xl bg-white/70 p-4 text-sm leading-6 text-slate-700">{{ application.truthfulness_notes }}</pre>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Manual review checklist</h2>
+          <ul class="mt-5 space-y-3 text-sm leading-6 text-slate-700">
+            {% for item in application.review_checklist %}
+              <li class="rounded-2xl bg-slate-50 px-4 py-3">{{ item }}</li>
+            {% else %}
+              <li class="rounded-2xl bg-slate-50 px-4 py-3">Generate a packet to populate the checklist.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

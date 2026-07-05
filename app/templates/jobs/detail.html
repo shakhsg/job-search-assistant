@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} | Job Copilot{% endblock %}
+
+{% block content %}
+  <section class="space-y-6">
+    <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-panel">
+      <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <p class="text-sm font-medium uppercase tracking-[0.2em] text-pine">{{ job.source_type|title }} source</p>
+          <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{{ job.title }}</h1>
+          <p class="mt-2 text-base text-slate-500">{{ job.company }} · {{ job.location or "Location TBD" }}</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Match score: {{ job.match_score }}</span>
+          <form method="post" action="{{ url_for('jobs.refresh', job_id=job.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Reparse + rescore</button>
+          </form>
+          <form method="post" action="{{ url_for('materials.generate', job_id=job.id) }}">
+            {{ material_form.hidden_tag() }}
+            {{ material_form.submit(class="rounded-full bg-pine px-4 py-2 text-sm font-medium text-white hover:bg-teal-700") }}
+          </form>
+          <form method="post" action="{{ url_for('jobs.delete', job_id=job.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="rounded-full border border-rose-200 px-4 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50">Delete</button>
+          </form>
+        </div>
+      </div>
+
+      {% if job.application %}
+        <div class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          A review packet already exists.
+          <a class="font-medium underline" href="{{ url_for('materials.detail', application_id=job.application.id) }}">Open application materials</a>.
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div class="space-y-6">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Edit job details</h2>
+          <form method="post" class="mt-5 space-y-4">
+            {{ form.hidden_tag() }}
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>{{ form.company.label(class="mb-2 block text-sm font-medium text-slate-700") }}{{ form.company(class="block w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3") }}</div>
+              <div>{{ form.title.label(class="mb-2 block text-sm font-medium text-slate-700") }}{{ form.title(class="block w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3") }}</div>
+              <div>{{ form.location.label(class="mb-2 block text-sm font-medium text-slate-700") }}{{ form.location(class="block w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3") }}</div>
+              <div>{{ form.employment_type.label(class="mb-2 block text-sm font-medium text-slate-700") }}{{ form.employment_type(class="block w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3") }}</div>
+              <div>{{ form.source_url.label(class="mb-2 block text-sm font-medium text-slate-700") }}{{ form.source_url(class="block w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3") }}</div>
+              <div>{{ form.application_url.label(class="mb-2 block text-sm font-medium text-slate-700") }}{{ form.application_url(class="block w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3") }}</div>
+            </div>
+            <div>{{ form.compensation.label(class="mb-2 block text-sm font-medium text-slate-700") }}{{ form.compensation(class="block w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3") }}</div>
+            <div>{{ form.description_raw.label(class="mb-2 block text-sm font-medium text-slate-700") }}{{ form.description_raw(class="block min-h-64 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3") }}</div>
+            {{ form.submit(class="rounded-2xl bg-slate-900 px-5 py-3 font-medium text-white hover:bg-slate-700") }}
+          </form>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Raw job description</h2>
+          <pre class="mt-5 max-h-[32rem] overflow-y-auto whitespace-pre-wrap rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">{{ job.description_raw }}</pre>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Score breakdown</h2>
+          <p class="mt-3 text-sm text-slate-500">{{ job.match_summary or "Complete your profile for a stronger score." }}</p>
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            {% for key, value in (job.score_details.get('components') or {}).items() %}
+              <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ key.replace('_', ' ') }}</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900">{{ value }}</p>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="mt-5 space-y-4">
+            <div>
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Strengths</h3>
+              <ul class="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                {% for item in job.score_details.get('strengths', []) %}
+                  <li class="rounded-2xl bg-emerald-50 px-4 py-3">{{ item }}</li>
+                {% else %}
+                  <li class="rounded-2xl bg-slate-50 px-4 py-3">No strengths extracted yet.</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Gaps</h3>
+              <ul class="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                {% for item in job.score_details.get('gaps', []) %}
+                  <li class="rounded-2xl bg-amber-50 px-4 py-3">{{ item }}</li>
+                {% else %}
+                  <li class="rounded-2xl bg-slate-50 px-4 py-3">No obvious gaps flagged.</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Unknowns</h3>
+              <ul class="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                {% for item in job.score_details.get('unknowns', []) %}
+                  <li class="rounded-2xl bg-slate-50 px-4 py-3">{{ item }}</li>
+                {% else %}
+                  <li class="rounded-2xl bg-slate-50 px-4 py-3">No unknowns flagged.</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="text-xl font-semibold text-slate-900">Parsed job details</h2>
+          <div class="mt-5 space-y-4 text-sm text-slate-700">
+            <div>
+              <p class="font-semibold text-slate-900">Skills</p>
+              <p class="mt-2">{{ job.parsed_data.get("skills", [])|join(", ") or "No skills extracted." }}</p>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900">Responsibilities</p>
+              <ul class="mt-2 space-y-2">
+                {% for item in job.parsed_data.get("responsibilities", []) %}
+                  <li class="rounded-2xl bg-slate-50 px-4 py-3">{{ item }}</li>
+                {% else %}
+                  <li class="rounded-2xl bg-slate-50 px-4 py-3">No responsibilities extracted.</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900">Requirements</p>
+              <ul class="mt-2 space-y-2">
+                {% for item in job.parsed_data.get("requirements", []) %}
+                  <li class="rounded-2xl bg-slate-50 px-4 py-3">{{ item }}</li>
+                {% else %}
+                  <li class="rounded-2xl bg-slate-50 px-4 py-3">No requirements extracted.</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Seniority</p>
+                <p class="mt-2 font-medium text-slate-900">{{ job.parsed_data.get("seniority", "Unknown") }}</p>
+              </div>
+              <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Work mode</p>
+                <p class="mt-2 font-medium text-slate-900">{{ job.parsed_data.get("work_mode", "Unknown") }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
