@@ -13,16 +13,16 @@ Manual-first Flask app for collecting jobs, scoring them against a real profile,
 
 ### Phase 1: Scaffold app
 
-- Flask app factory in [app/__init__.py](/Users/shuhratmirzaev/Documents/New project/app/__init__.py)
+- Flask app factory in [`app/__init__.py`](app/__init__.py)
 - Modular folders for blueprints, forms, models, repositories, services, templates, static assets, scripts, and tests
-- Tailwind-based UI shell in [app/templates/base.html](/Users/shuhratmirzaev/Documents/New project/app/templates/base.html)
+- Tailwind-based UI shell in [`app/templates/base.html`](app/templates/base.html)
 
 ### Phase 2: Auth + database
 
 - SQLite models for users, profile, jobs, and applications
 - Secure login with hashed passwords using Werkzeug
 - CSRF protection via Flask-WTF
-- Environment-driven config in [app/config.py](/Users/shuhratmirzaev/Documents/New project/app/config.py)
+- Environment-driven config in [`app/config.py`](app/config.py)
 
 ### Phase 3: Jobs CRUD + parsing
 
@@ -34,7 +34,7 @@ Manual-first Flask app for collecting jobs, scoring them against a real profile,
 
 ### Phase 4: Scoring engine
 
-- Transparent match scoring in [app/services/scoring.py](/Users/shuhratmirzaev/Documents/New project/app/services/scoring.py)
+- Transparent match scoring in [`app/services/scoring.py`](app/services/scoring.py)
 - Visible strengths, gaps, unknowns, and score components
 - Rescoring when the profile changes
 
