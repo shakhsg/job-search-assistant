@@ -1,3 +1,12 @@
+"""
+Authentication blueprint — registration, login, and logout routes.
+
+Handles user account creation with duplicate email checking, secure
+password hashing via Werkzeug, Flask-Login session management,
+and CSRF protection via Flask-WTF forms.
+
+Author: Shukhrat Mirzaev
+"""
 from flask import Blueprint, current_app, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
@@ -12,6 +21,14 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
+    """Handle user registration.
+
+    Validates form input, checks for duplicate emails, creates user
+    with hashed password, initializes an empty profile, and logs
+    the user in automatically on success.
+
+    Redirects authenticated users to the dashboard.
+    """
     if current_user.is_authenticated:
         return redirect(url_for("dashboard.index"))
     if not current_app.config["ENABLE_REGISTRATION"]:
@@ -38,6 +55,12 @@ def register():
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    """Authenticate user with email and password.
+
+    Verifies credentials against stored password hash, creates
+    a Flask-Login session on success. Redirects already
+    authenticated users to the dashboard.
+    """
     if current_user.is_authenticated:
         return redirect(url_for("dashboard.index"))
 
@@ -57,6 +80,7 @@ def login():
 @auth_bp.route("/logout", methods=["POST"])
 @login_required
 def logout():
+    """Sign out the current user and clear their session."""
     logout_user()
     flash("You have been signed out.", "info")
     return redirect(url_for("auth.login"))
