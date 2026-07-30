@@ -1,150 +1,122 @@
 # Job Search and Application Copilot
 
-Manual-first Flask app for collecting jobs, scoring them against a real profile, generating honest application materials, and tracking progress without blind auto-submission.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.0%2B-000000?logo=flask)](https://flask.palletsprojects.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
+[![SQLite](https://img.shields.io/badge/SQLite-database-003B57?logo=sqlite)](https://sqlite.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![CI](https://github.com/shakhsg/job-search-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/shakhsg/job-search-assistant/actions)
+
+AI-powered job search copilot — collect, score, and track job applications with honest AI-generated resumes and cover letters. Built with Flask, SQLite, and Tailwind CSS.
+
+**Author:** Shukhrat Mirzaev | **Skills:** Flask · SQLite · Tailwind CSS · REST API · Web Scraping · AI Prompting
+
+---
 
 ## Principles
 
-- Truthfulness first: generated content is based on stored profile facts plus parsed job descriptions.
-- Security first: hashed passwords, CSRF protection, validation, secure session settings, and SSRF-style URL checks for remote ingestion.
-- Simple UI: Tailwind-powered screens focused on profile, jobs, materials, and tracker workflows.
-- Reusable architecture: app factory, blueprints, services, repositories, forms, and models are split into clear modules.
+- **Truthfulness first** — generated content is based on stored profile facts plus parsed job descriptions.
+- **Security first** — hashed passwords, CSRF protection, validation, secure session settings, and SSRF-style URL checks.
+- **Simple UI** — Tailwind-powered screens focused on profile, jobs, materials, and tracker workflows.
+- **Reusable architecture** — app factory, blueprints, services, repositories, forms, and models.
+
+---
 
 ## What is built
 
 ### Phase 1: Scaffold app
-
 - Flask app factory in [`app/__init__.py`](app/__init__.py)
-- Modular folders for blueprints, forms, models, repositories, services, templates, static assets, scripts, and tests
+- Modular folders for blueprints, forms, models, repositories, services, templates
 - Tailwind-based UI shell in [`app/templates/base.html`](app/templates/base.html)
 
 ### Phase 2: Auth + database
-
 - SQLite models for users, profile, jobs, and applications
 - Secure login with hashed passwords using Werkzeug
 - CSRF protection via Flask-WTF
 - Environment-driven config in [`app/config.py`](app/config.py)
 
 ### Phase 3: Jobs CRUD + parsing
-
 - Manual job CRUD flow
 - Link ingestion with HTML extraction
 - CSV ingestion
-- Optional allowed API ingestion with provider adapters for `generic_json`, `greenhouse`, and `lever`
+- Optional API ingestion with adapters for `generic_json`, `greenhouse`, and `lever`
 - Job description parser for skills, responsibilities, requirements, seniority, and work mode
 
 ### Phase 4: Scoring engine
-
 - Transparent match scoring in [`app/services/scoring.py`](app/services/scoring.py)
 - Visible strengths, gaps, unknowns, and score components
 - Rescoring when the profile changes
 
 ### Phase 5: Resume + cover letter generation
-
 - Honest tailored resume draft
 - Honest cover letter draft
 - Application-answer preparation
 - Truthfulness notes and review checklist
 
 ### Phase 6: Tracker dashboard
-
 - Status-based tracker
 - Manual review and manual submission confirmation gates
 - CSV export
 
 ### Phase 7: Polish + tests + README
-
 - Seed data
 - Test suite for auth, jobs, materials, and tracker
 - Setup and architecture documentation
 
-## Folder structure
+---
 
-```text
-app/
-  blueprints/
-  forms/
-  models/
-  repositories/
-  services/
-  static/
-  templates/
-scripts/
-tests/
-run.py
-requirements.txt
-```
-
-## Quick start
-
-1. Create a virtual environment and activate it.
-2. Install dependencies:
+## Quick Start
 
 ```bash
+# Clone
+git clone https://github.com/shakhsg/job-search-assistant.git
+cd job-search-assistant
+
+# Setup
+python -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
-```
+cp .env.example .env  # Edit with your secrets
 
-3. Copy the environment file and update secrets:
-
-```bash
-cp .env.example .env
-```
-
-4. Initialize the database:
-
-```bash
+# Initialize
 python scripts/init_db.py
-```
-
-5. Seed demo data:
-
-```bash
 python scripts/seed_data.py
-```
 
-6. Run the app:
-
-```bash
+# Run
 flask --app run.py run --debug
 ```
 
-Demo login after seeding:
+**Demo login:** `demo@example.com` / `demo12345`
 
-- Email: `demo@example.com`
-- Password: `demo12345`
+---
 
-## Security notes
+## CSV Format
 
-- Set a strong `SECRET_KEY` before any non-local deployment.
-- `ALLOWED_API_HOSTS` must be configured before API ingestion is enabled.
-- Remote ingestion rejects local and private hostnames to reduce SSRF risk.
-- This app does not auto-submit jobs and should remain manual-first by design.
-- Tailwind is loaded via CDN for simplicity. For production, pin and self-host compiled assets.
+Expected columns: `company`, `title`, `location`, `description`, `source_url`, `application_url`, `employment_type`, `compensation`, `external_id`
 
-## CSV format
-
-Expected columns can include:
-
-- `company`
-- `title`
-- `location`
-- `description`
-- `source_url`
-- `application_url`
-- `employment_type`
-- `compensation`
-- `external_id`
+---
 
 ## Testing
-
-Run:
 
 ```bash
 pytest
 ```
 
-## Extension ideas
+---
 
-- Add resume versioning and downloadable DOCX/PDF exports
-- Add structured experience tables instead of freeform profile text
-- Add optional LLM-assisted drafting with strong fact-guardrails
-- Add a PDF/portfolio ingestion pipeline if you want the referenced PDF incorporated later
+## Security Notes
+
+- Set a strong `SECRET_KEY` before any non-local deployment
+- `ALLOWED_API_HOSTS` must be configured before API ingestion
+- Remote ingestion rejects local and private hostnames (SSRF protection)
+- Manual-first by design — no auto-submission
+- Tailwind via CDN for dev; pin and self-host for production
+
+---
+
+## Extension Ideas
+
+- [ ] Resume versioning and downloadable DOCX/PDF exports
+- [ ] Structured experience tables instead of freeform profile text
+- [ ] Optional LLM-assisted drafting with fact-guardrails
+- [ ] PDF/portfolio ingestion pipeline
